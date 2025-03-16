@@ -34,7 +34,7 @@ import socket
 import time
 from twisted.python import log
 from smap import driver, core, util
-from labjackpython import ue9
+from .labjackpython import ue9
 
 """
 sMAP interface for Labjack devices -- currently the UE9 series.
@@ -80,12 +80,12 @@ class LabjackDriver(driver.SmapDriver):
         cmps = opts.get('ConfModule').split('.')
         mod = __import__('.'.join(cmps), globals(), locals(), ['CONF']) 
         self.labjacks = {}
-        for ljname, ljconf in mod.CONF.iteritems():
+        for ljname, ljconf in mod.CONF.items():
             # create all the time series and calibration functions
             dev = ReconnectingUE9(ipAddress=ljconf['address'], ethernet=True)
             self.labjacks[ljname] = (ljconf, dev)
 
-            for cname, cconf in ljconf['channels'].iteritems():
+            for cname, cconf in ljconf['channels'].items():
                 cconf['calibrate'] = build_calibrate(cconf)
                 path = '/%s/%s' % (ljname, cname)
                 self.add_timeseries(path,
@@ -102,11 +102,11 @@ class LabjackDriver(driver.SmapDriver):
                 })
 
     def start(self):
-        for ljname, (ljconf, dev) in self.labjacks.iteritems():
+        for ljname, (ljconf, dev) in self.labjacks.items():
             util.periodicSequentialCall(self.update, ljname, dev, ljconf).start(ljconf['rate'])
 
     def update(self, ljname, dev, ljconf):
-        for cname, cconf in ljconf['channels'].iteritems():
+        for cname, cconf in ljconf['channels'].items():
             v = dev.readRegister(cconf['register'])
             self.add('/%s/%s' % (ljname, cname), 
                      cconf['calibrate'](v))

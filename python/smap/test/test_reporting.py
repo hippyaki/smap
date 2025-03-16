@@ -51,7 +51,7 @@ class TestDataBuffer(unittest.TestCase):
         u = uuid.uuid1()
         d = reporting.DataBuffer(self.TEST_DIR)
 
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
         rv = d.read()
         self.assertEqual(len(rv), 1)
@@ -61,7 +61,7 @@ class TestDataBuffer(unittest.TestCase):
         self.assertTrue('Readings' in val)
         self.assertTrue(val['uuid'] == u)
         self.assertEqual(len(val['Readings']), 20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             self.assertEqual(val['Readings'][i]['ReadingTime'], i)
             self.assertEqual(val['Readings'][i]['Reading'], i)
         del d
@@ -70,7 +70,7 @@ class TestDataBuffer(unittest.TestCase):
         u = uuid.uuid1()
         d = reporting.DataBuffer(self.TEST_DIR)
 
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
 
         # make sure we don't mutate the object while doing this...
@@ -83,13 +83,13 @@ class TestDataBuffer(unittest.TestCase):
     def test_maxsize(self):
         u = uuid.uuid1()
         d = reporting.DataBuffer(10)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
         rv = d.read()
         self.assertEqual(len(rv['/test']['Readings']), 10)
         rv = d.read()
         self.assertEqual(len(rv['/test']['Readings']), 10)
-        for i in xrange(10, 20):
+        for i in range(10, 20):
             self.assertEqual(rv['/test']['Readings'][i-10]['ReadingTime'], i)
             self.assertEqual(rv['/test']['Readings'][i-10]['Reading'], i)
         del d
@@ -98,10 +98,10 @@ class TestDataBuffer(unittest.TestCase):
     def test_truncate(self):
         u = uuid.uuid1()
         d = reporting.DataBuffer(self.TEST_DIR)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
         rv = d.read()
-        print len(d)
+        print(len(d))
         self.assertEqual(len(rv['/test']['Readings']), 20)
         d.truncate(tspec)
         self.assertEqual(len(d), 19)
@@ -111,12 +111,12 @@ class TestDataBuffer(unittest.TestCase):
     def test_metadata_split(self):
         u = uuid.uuid1()
         d = reporting.DataBuffer(self.TEST_DIR)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
         d.add('/test', {'uuid': u, 'Metadata' : {'Extra': {'foo': 'bar'} } })
         rv = d.read()
         d.truncate()
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
         rv = d.read()
 
@@ -124,14 +124,14 @@ class TestDataBuffer(unittest.TestCase):
         u = uuid.uuid1()
         d = reporting.DataBuffer(self.TEST_DIR)
         
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
 
         rv = d.read()
         self.assertEqual(len(rv['/test']['Readings']), 10)
         self.assertEqual(rv['/test']['Readings'][0]['Reading'], 0)
 
-        for i in xrange(20, 30):
+        for i in range(20, 30):
             d.add('/test', {'uuid': u, 'Readings' : [{'ReadingTime' : i, 'Reading': i}]})
 
         rv = d.read()  # should be the next 10 since we overwrite

@@ -79,7 +79,7 @@ class CT80(SmapDriver):
                 setup["range"] = a["range"]
                 act = ContinuousActuator(**setup)
             else:
-                print 'invalid actuator type'
+                print('invalid actuator type')
             self.add_actuator("/" + a["name"] + "_act", a["unit"], act, data_type=a["data_type"], write_limit=5)
 
     def start(self):

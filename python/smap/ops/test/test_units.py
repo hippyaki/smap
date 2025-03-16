@@ -51,11 +51,11 @@ class TestUnits(unittest.TestCase):
         op = StandardizeUnitsOperator([{
                     'uuid': 'caa850e0-4c67-11e2-8699-97d49b2d114e',
                     'Properties/UnitofMeasure': 'W'}])
-        self.assertEquals(op([np.array([[0, 1000]])])[0][0,1], 1.0)
+        self.assertEqual(op([np.array([[0, 1000]])])[0][0,1], 1.0)
 
         # Fahrenheit
         op = StandardizeUnitsOperator([{
                     'uuid': 'caa850e0-4c67-11e2-8699-97d49b2d114e',
                     'Properties/UnitofMeasure': 'deg F'}])
-        self.assertEquals(op([np.array([[0, 32]])])[0][0,1], 0)
-        self.assertEquals(op([np.array([[0, 212]])])[0][0,1], 100)
+        self.assertEqual(op([np.array([[0, 32]])])[0][0,1], 0)
+        self.assertEqual(op([np.array([[0, 212]])])[0][0,1], 100)

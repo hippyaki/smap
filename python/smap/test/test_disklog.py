@@ -63,7 +63,7 @@ class TestDiskLog(unittest.TestCase):
         try:
             dl = DiskLog("testdir")
             dl.append("FOO 0")
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 self.assertEqual(dl.tail(), "FOO " + str(i-1))
                 self.assertEqual(dl.head(), "FOO 0")
                 dl.append("FOO " + str(i))
@@ -74,12 +74,12 @@ class TestDiskLog(unittest.TestCase):
         try:
             dl = DiskLog("testdir")
             dl.append("FOO 0")
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 self.assertEqual(dl.tail(), "FOO " + str(i-1))
                 self.assertEqual(dl.head(), "FOO 0")
                 dl.append("FOO " + str(i))
 
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 dl.pop()
                 self.assertEqual(dl.head(), "FOO " + str(i))
         finally:
@@ -89,14 +89,14 @@ class TestDiskLog(unittest.TestCase):
         try:
             dl = DiskLog("testdir")
             dl.append("FOO 0")
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 self.assertEqual(dl.tail(), "FOO " + str(i-1))
                 self.assertEqual(dl.head(), "FOO 0")
                 dl.append("FOO " + str(i))
             dl.sync()
                 
             dl2 = DiskLog("testdir")
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 dl2.pop()
                 self.assertEqual(dl2.head(), "FOO " + str(i))
         finally:
@@ -106,7 +106,7 @@ class TestDiskLog(unittest.TestCase):
         try:
             dl = DiskLog("testdir")
             dl.append("FOO 0")
-            for i in xrange(1, 10):
+            for i in range(1, 10):
                 self.assertEqual(dl.head(), "FOO " + str(i-1))
                 self.assertEqual(dl.tail(), "FOO " + str(i-1))
                 dl.append("FOO " + str(i))
@@ -168,8 +168,8 @@ class TestDiskLog(unittest.TestCase):
     def test_big(self):
         try:
             dl = DiskLog("testdir")
-            for i in xrange(0, 10):
-                dl.append([i for i in xrange(0, 100000)])
+            for i in range(0, 10):
+                dl.append([i for i in range(0, 100000)])
         finally:
             shutil.rmtree("testdir")
 
@@ -177,7 +177,7 @@ class TestDiskLog(unittest.TestCase):
         try:
             max_age = datetime.timedelta(seconds=1)
             dl = DiskLog("testdir", max_age)
-            for i in xrange(0, 10):
+            for i in range(0, 10):
                 dl.append(str(i))
             dl.sync()
             self.assertEqual(dl.head(), "0")
@@ -191,7 +191,7 @@ class TestDiskLog(unittest.TestCase):
     def test_disappearing_logs(self):
         try:
             dl = DiskLog("testdir")
-            for i in xrange(0, 10):
+            for i in range(0, 10):
                 dl.append(i)
             dl.sync()
 
@@ -220,18 +220,18 @@ class TestDiskLog(unittest.TestCase):
         progress"""
         try:
             dl = DiskLog("testdir")
-            for i in xrange(0, 10):
+            for i in range(0, 10):
                 dl.append(i)
             dl.sync()
         finally:
             shutil.rmtree("testdir")
 
-        map(os.remove, glob.glob("testdir/000*"))
+        list(map(os.remove, glob.glob("testdir/000*")))
 
         try:
             dl = DiskLog("testdir")
             self.assertEqual(dl.head(), None)
-            for i in xrange(20, 30):
+            for i in range(20, 30):
                 dl.append(i)
             dl.sync()
             self.assertEqual(dl.head(), 20)
@@ -252,10 +252,10 @@ class TestDiskLog(unittest.TestCase):
             self.assertEqual(d.head(), 3)
             
             del d
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         finally:
-            os.chmod(os.path.abspath("testdir"), 0755)
+            os.chmod(os.path.abspath("testdir"), 0o755)
 
         try:
             # the stuff in memory goes away when we reopen the disk
@@ -273,7 +273,7 @@ class TestDiskLog(unittest.TestCase):
 
             del d
             with open("testdir/META", "w") as fp:
-                print >>fp, "CORRUPT"
+                print("CORRUPT", file=fp)
 
             d = DiskLog("testdir")
         finally:

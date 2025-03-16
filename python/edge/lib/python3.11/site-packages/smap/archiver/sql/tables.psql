@@ -1,0 +1,73 @@
+-- -*- sql -*-
+
+CREATE LANGUAGE plpgsql;
+CREATE EXTENSION hstore;
+
+-- table for list of sMAP sources we should be subscribed to
+CREATE TABLE subscription (
+       id INT PRIMARY KEY,
+       uuid VARCHAR(36),
+       url VARCHAR(512) NOT NULL,
+       resource VARCHAR(512) NOT NULL DEFAULT '/+',
+       key VARCHAR(36),
+       public BOOLEAN DEFAULT true,
+       description VARCHAR(256),
+       owner_id integer DEFAULT 1
+);
+CREATE UNIQUE INDEX subscription_key_ind ON subscription(key);
+CREATE SEQUENCE subscription_id_seq;
+ALTER TABLE subscription
+  ALTER COLUMN id
+     SET DEFAULT NEXTVAL('subscription_id_seq');
+
+-- list of streams associated with a sMAP source
+CREATE TABLE stream (
+       id INT PRIMARY KEY,
+       subscription_id INT NOT NULL,
+       uuid VARCHAR(36) UNIQUE,
+       metadata HSTORE DEFAULT hstore(array[]::varchar[]),
+
+       FOREIGN KEY (subscription_id) REFERENCES subscription(id)
+         ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX uuid_ind ON stream(uuid);
+CREATE INDEX subscription_int ON stream(subscription_id);
+CREATE INDEX metadata_index ON stream USING GIST(metadata);
+CREATE SEQUENCE stream_id_seq;
+ALTER TABLE stream
+  ALTER COLUMN id
+    SET DEFAULT NEXTVAL('stream_id_seq');
+
+-- create a set of API keys and permissions
+CREATE TABLE permission (
+       id INT PRIMARY KEY,
+       key VARCHAR(36),
+       description VARCHAR(256),
+        
+       valid_after TIMESTAMP DEFAULT NULL,
+       valid_until TIMESTAMP DEFAULT NULL,
+       can_select BOOLEAN NOT NULL DEFAULT true,
+       can_delete BOOLEAN NOT NULL DEFAULT false,
+       can_set BOOLEAN NOT NULL DEFAULT false
+);
+CREATE SEQUENCE permission_id_seq;
+ALTER TABLE permission
+  ALTER COLUMN id
+    SET DEFAULT NEXTVAL('permission_id_seq');
+
+-- contains permission -> set(subscription) that contains the
+-- subscriptions that the permission applies to
+CREATE TABLE permission_subscriptions (
+       id INT PRIMARY KEY,
+       subscription_id INT,
+       permission_id INT,
+
+       UNIQUE (permission_id, subscription_id),
+       FOREIGN KEY (subscription_id) REFERENCES subscription(id),
+       FOREIGN KEY (permission_id) REFERENCES permission(id)
+);
+
+CREATE SEQUENCE permission_subscriptions_id_seq;
+ALTER TABLE permission_subscriptions
+  ALTER COLUMN id
+    SET DEFAULT NEXTVAL('permission_subscriptions_id_seq');

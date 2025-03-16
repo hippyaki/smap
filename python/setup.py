@@ -42,10 +42,10 @@ if os.path.basename(os.getcwd()) == 'python':
 
 # build modbus extension module
 modbus_module = Extension('smap.iface.modbus._TCPModbusClient',
-                          sources=map(lambda f: "smap/iface/modbus/" + f,
+                          sources=list(map(lambda f: "smap/iface/modbus/" + f,
                                       ["TCPModbusClient_wrap.c", "TCPModbusClient.c",
                                        "utility.c", "crc16.c", "DieWithError.c",
-                                       "HandleModbusTCPClient.c"]))
+                                       "HandleModbusTCPClient.c"])))
 
 inc_dir = ['bacnet-stack-0.6.0/include', 
            'bacnet-stack-0.6.0/demo/object',
@@ -73,19 +73,25 @@ bacnet_module = Extension('smap.iface.pybacnet._bacnet',
 
 def git_rev():
     try:
-        # this works when building to add the git repo but when
-        # distributing, it's not in a git repo so we we stash the
-        # current version in VERSION, and include it in MANIFEST.in
-        version = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
-        with open('VERSION', 'w') as fp:
-            print >>fp, version
-        return version
-    except subprocess.CalledProcessError, e:
-        return open('VERSION', 'r').read()
+        # Try to get the Git revision
+        version = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+        
+        # Only write to the VERSION file if it's writable
+        if os.access('VERSION', os.W_OK) or not os.path.exists('VERSION'):
+            with open('VERSION', 'w') as fp:
+                print(version, file=fp)
 
+        return version
+
+    except subprocess.CalledProcessError:
+        # If Git command fails, try to read the stored VERSION file
+        if os.path.exists('VERSION') and os.access('VERSION', os.R_OK):
+            return open('VERSION', 'r').read().strip()
+        else:
+            return "unknown"  # Return a default value if VERSION is missing
 
 setup(name="Smap",
-      version='2.0.R' + git_rev()[:6],
+      version='2.0.0+git' + git_rev()[:6],
       description="sMAP standard library and drivers",
       author="Stephen Dawson-Haggerty",
       author_email="stevedh@eecs.berkeley.edu",

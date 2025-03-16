@@ -34,7 +34,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 import time
 import calendar
 import re
-import urllib2, base64
+import urllib.request, urllib.error, urllib.parse, base64
 import logging,os,sys
 from time import sleep
 
@@ -86,15 +86,15 @@ class NT160e(SmapDriver):
     def scrape(self):
         current_values = {}
         try:
-            request = urllib2.Request(self.baseurl + '/index.shtml')
+            request = urllib.request.Request(self.baseurl + '/index.shtml')
             base64string = base64.encodestring('%s:%s' % (self.auth[0], self.auth[1])).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
-            response = urllib2.urlopen(request)
+            response = urllib.request.urlopen(request)
             page1 = response.read()
 
-            request = urllib2.Request(self.baseurl + '/settings.shtml')
+            request = urllib.request.Request(self.baseurl + '/settings.shtml')
             request.add_header("Authorization", "Basic %s" % base64string)
-            response = urllib2.urlopen(request)
+            response = urllib.request.urlopen(request)
 
             page2 = response.read()
 
@@ -105,7 +105,7 @@ class NT160e(SmapDriver):
                     scale = line.split('"')[3]
                     break
 
-            for field in self.FIELDS.keys():
+            for field in list(self.FIELDS.keys()):
                 items = re.search(self.FIELDS[field][1] + '.+', page1)
                 if items:
                     if field == 'hvac_state':
@@ -138,8 +138,8 @@ class NT160e(SmapDriver):
                     current_values[field] = float(value)
                     have_data = True
             reading_time = time.mktime(time.localtime())
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             fname = os.path.split(sys.exc_info()[2].tb_frame.f_code.co_filename)[1]
             log.err()
             logging.error('Error (' + str(sys.exc_info()[0]) + ') : ' + str(e) + ' from ' + fname + ':' + str(sys.exc_info()[2].tb_lineno))
@@ -147,11 +147,11 @@ class NT160e(SmapDriver):
 
         if have_data == True:
             try:
-                for field in self.FIELDS.keys():
+                for field in list(self.FIELDS.keys()):
                     self.add('/' + field, reading_time, current_values[field])
                 have_data = False
-            except Exception,e:
-                print e
+            except Exception as e:
+                print(e)
                 fname = os.path.split(sys.exc_info()[2].tb_frame.f_code.co_filename)[1]
                 log.err()
                 logging.error('Error (' + str(sys.exc_info()[0]) + ') : ' + str(e) + ' from ' + fname + ':' + str(sys.exc_info()[2].tb_lineno))
@@ -161,7 +161,7 @@ class NT160e(SmapDriver):
         self.baseurl = 'http://' + self.ip
         self.auth = [opts.get('login'),opts.get('password')]
 
-        for stream, meta in self.FIELDS.iteritems():
+        for stream, meta in self.FIELDS.items():
             log.msg('adding stream /' + opts.get('key') + '/' + stream)
             logging.info('adding stream /' + opts.get('key') + '/' + stream)
             self.add_timeseries('/' + stream, meta[0],

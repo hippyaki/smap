@@ -37,9 +37,9 @@ class TimeseriesTest(unittest.TestCase):
 
     def setUp(self):
         c = TimeseriesCache('test')
-        c.insert(self.SS, 0, 10, np.array(zip(range(0, 10), range(0,10))))
-        c.insert(self.SS, 20, 30, np.array(zip(range(20, 30), range(20,30))))
-        c.insert(self.SS, 30, 40, np.array(zip(range(30, 40), range(30,40))))
+        c.insert(self.SS, 0, 10, np.array(list(zip(list(range(0, 10)), list(range(0,10))))))
+        c.insert(self.SS, 20, 30, np.array(list(zip(list(range(20, 30)), list(range(20,30))))))
+        c.insert(self.SS, 30, 40, np.array(list(zip(list(range(30, 40)), list(range(30,40))))))
         c.close()
 
     def tearDone(self):
@@ -49,9 +49,9 @@ class TimeseriesTest(unittest.TestCase):
 
     def testInserted(self):
         c = TimeseriesCache('test')
-        self.assertTrue(c.cache.has_key('0'))
-        self.assertTrue(c.cache['0'].has_key('0-10'))
-        self.assertTrue(c.cache['0'].has_key('20-30'))
+        self.assertTrue('0' in c.cache)
+        self.assertTrue('0-10' in c.cache['0'])
+        self.assertTrue('20-30' in c.cache['0'])
 
     def testSave(self):
         c = TimeseriesCache('test')

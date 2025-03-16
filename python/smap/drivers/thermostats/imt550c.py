@@ -29,7 +29,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 @author Jonathan Fuerst <jonf@itu.dk>
 """
-import os, requests, __builtin__
+import os, requests, builtins
 from smap import actuate, driver
 from smap.util import periodicSequentialCall
 from smap.contrib import dtutil
@@ -125,7 +125,7 @@ class IMT550C(driver.SmapDriver):
                     self.add_actuator('/' + p['name'] + '_act', p['unit'], act,
                         data_type = p['data_type'], write_limit=5)
                 else:
-                    print "sth is wrong here"
+                    print("sth is wrong here")
 
     def start(self):
         # call self.read every self.rate seconds
@@ -137,7 +137,7 @@ class IMT550C(driver.SmapDriver):
             r = requests.get(url, auth=HTTPDigestAuth(self.user, self.password))
             val = r.text.split('=', 1)[-1]
             if p["data_type"] == "long":
-                self.add("/" + p["name"], p['devtosmap'](long(val)))
+                self.add("/" + p["name"], p['devtosmap'](int(val)))
             else:
                 self.add("/" + p["name"], p['devtosmap'](float(val)))
 

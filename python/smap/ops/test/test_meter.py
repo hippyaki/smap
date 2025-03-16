@@ -35,51 +35,51 @@ from smap.ops.meter import _meter
 class TestMeter(unittest.TestCase):
     def test_increasing(self):
         d = np.ones(20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d[i] = i
         rv = _meter(d, 0)
-        self.assertEquals(rv, 19)
+        self.assertEqual(rv, 19)
 
     def test_one_reset(self):
         d = np.ones(20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             if i < 10: d[i] = i
             else: d[i] = i - 10
         rv = _meter(d, 0)
-        self.assertEquals(rv, 18)
+        self.assertEqual(rv, 18)
 
     def test_reset_before(self):
         d = np.ones(20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d[i] = i
         d[-1] = 3
         rv = _meter(d, 0)
-        self.assertEquals(rv, 21)
+        self.assertEqual(rv, 21)
 
     def test_reset_first(self):
         d = np.ones(20)
-        for i in xrange(1, 20):
+        for i in range(1, 20):
             d[i] = i
         d[0] = 10
         rv = _meter(d, 0)
-        self.assertEquals(rv, 29)        
+        self.assertEqual(rv, 29)        
 
     def test_decreasing_simple(self):
         d = np.array([3, 2, 1])
         rv = _meter(d, 0)
-        self.assertEquals(rv, np.sum(d))
+        self.assertEqual(rv, np.sum(d))
 
     def test_decreasing(self):
         d = np.ones(20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d[i] = 20 - i
         rv = _meter(d, reset_threshold=0)
-        self.assertEquals(rv, np.sum(d))
+        self.assertEqual(rv, np.sum(d))
 
     def test_starting_offset(self):
         d = np.ones(20)
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             d[i] = i + 10
         rv = _meter(d, reset_threshold=0)
-        self.assertEquals(rv, 19)
+        self.assertEqual(rv, 19)
 

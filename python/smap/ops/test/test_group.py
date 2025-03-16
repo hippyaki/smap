@@ -42,7 +42,7 @@ from smap.contrib import dtutil
 
 def make_input_meta(n, extra_metadata={}):
     inputs = []
-    for i in xrange(0, n):
+    for i in range(0, n):
         inp = {
             'uuid': str(uuid.uuid1()),
             'Properties/UnitofMeasure': ''
@@ -52,9 +52,9 @@ def make_input_meta(n, extra_metadata={}):
     return inputs
 
 def make_test_data(n=2, len=20):
-    data = map(lambda _: np.ones((len, 2)), xrange(0, n))
-    for i in xrange(0, len):
-        for j in xrange(0, n):
+    data = [np.ones((len, 2)) for _ in range(0, n)]
+    for i in range(0, len):
+        for j in range(0, n):
             data[j][i, 0] = i
             data[j][i, 1] = i * (j + 1)
     return data
@@ -70,7 +70,7 @@ class TestGroupByDatetime(unittest.TestCase):
                 }]
 
         self.testdata = np.ones((self.hours, 2))
-        for i in xrange(0, self.hours):
+        for i in range(0, self.hours):
             self.testdata[i, :] = i
             
         self.testdata[:, 0] *= 3600 
@@ -80,22 +80,22 @@ class TestGroupByDatetime(unittest.TestCase):
     def test_day(self):
         op = grouping.GroupByDatetimeField(self.inputs, arithmetic.mean, field='day')
         outdata = op([self.testdata])
-        self.assertEquals(len(outdata), 1)
-        self.assertEquals(len(outdata[0]), (self.hours / 24) + 1)
+        self.assertEqual(len(outdata), 1)
+        self.assertEqual(len(outdata[0]), (self.hours / 24) + 1)
 
     def test_hour(self):
         op = grouping.GroupByDatetimeField(self.inputs, arithmetic.mean, field='hour')
         outdata = op([self.testdata])
 
         # don't get an output for the last hour
-        self.assertEquals(len(outdata[0]), self.hours - 1)
-        for i in xrange(0, len(outdata[0])):
+        self.assertEqual(len(outdata[0]), self.hours - 1)
+        for i in range(0, len(outdata[0])):
             # should have only been one thing in each bucket
-            self.assertEquals(outdata[0][i, 1], i)
+            self.assertEqual(outdata[0][i, 1], i)
             # make sure we snapped to the beginning of the window
             dt = datetime.datetime.utcfromtimestamp(outdata[0][i, 0] / 1000)
-            self.assertEquals(dt.minute, 0)
-            self.assertEquals(dt.second, 0)
+            self.assertEqual(dt.minute, 0)
+            self.assertEqual(dt.second, 0)
             
     def test_offset(self):
         now = dtutil.strptime_tz("1 1 2000 0", "%m %d %Y %H", tzstr="America/Los_Angeles")
@@ -103,9 +103,9 @@ class TestGroupByDatetime(unittest.TestCase):
         self.setUp(now)
         
         op = grouping.GroupByDatetimeField(self.inputs, oputils.NullOperator, field='day')
-        for i in xrange(0, 24):
+        for i in range(0, 24):
             rv = op([self.testdata[i:25+i, :]])
-            self.assertEquals(rv[0].shape, (24 - i, 2))
+            self.assertEqual(rv[0].shape, (24 - i, 2))
             op.reset()
 
     def test_oneatatime(self):
@@ -114,17 +114,17 @@ class TestGroupByDatetime(unittest.TestCase):
         self.setUp(now)
 
         op = grouping.GroupByDatetimeField(self.inputs, oputils.NullOperator, field='day')
-        for i in xrange(0, 24):
+        for i in range(0, 24):
             rv = op([self.testdata[i:i+1, :]])
-            self.assertEquals(rv[0].shape, operators.null.shape)
+            self.assertEqual(rv[0].shape, operators.null.shape)
 
         rv = op([self.testdata[24:25, :]])
 
-        self.assertEquals(rv[0].shape, (24, 2))
+        self.assertEqual(rv[0].shape, (24, 2))
         # make sure we snapped
-        self.assertEquals(np.sum(rv[0][:, 0] - self.testdata[0, 0]), 0)
+        self.assertEqual(np.sum(rv[0][:, 0] - self.testdata[0, 0]), 0)
         # and got back the right data
-        self.assertEquals(np.sum(rv[0][:, 1] - self.testdata[:24, 1]), 0)
+        self.assertEqual(np.sum(rv[0][:, 1] - self.testdata[:24, 1]), 0)
 
     def test_inclusive(self):
         now = dtutil.strptime_tz("1 1 2000 0", "%m %d %Y %H", tzstr="America/Los_Angeles")
@@ -145,9 +145,9 @@ class TestGroupByDatetime(unittest.TestCase):
                                             field='day', inclusive=(True, True),
                                             snap_times=False)
         rv = op2([self.testdata[0:30, :]])
-        self.assertEquals(rv[0].shape, (25, 2))
-        self.assertEquals(rv[0][0, 0], self.testdata[0, 0])
-        self.assertEquals(rv[0][24, 0], self.testdata[24, 0])
+        self.assertEqual(rv[0].shape, (25, 2))
+        self.assertEqual(rv[0][0, 0], self.testdata[0, 0])
+        self.assertEqual(rv[0][24, 0], self.testdata[24, 0])
 
 #         # push some more test data through!!!
 #         rv = op2([self.testdata[30:60, :]])
@@ -176,12 +176,12 @@ class TestGroupByDatetime(unittest.TestCase):
                                                width=incr)
             rv = op([self.testdata[:25, :]])
             # check the shape
-            self.assertEquals(len(rv[0]), 24 / incr)
-            for i in xrange(0, 24/incr):
+            self.assertEqual(len(rv[0]), 24 / incr)
+            for i in range(0, 24/incr):
                 # the timestamps
-                self.assertEquals(rv[0][i, 0], self.testdata[i * incr, 0])
+                self.assertEqual(rv[0][i, 0], self.testdata[i * incr, 0])
                 # and the values
-                self.assertEquals(rv[0][i, 1], i * incr)
+                self.assertEqual(rv[0][i, 1], i * incr)
             del op
 
     def test_snap_times(self):
@@ -193,7 +193,7 @@ class TestGroupByDatetime(unittest.TestCase):
                                            field='day', 
                                            snap_times=True)
         rv = op([self.testdata[10:30]])
-        self.assertEquals(rv[0][0, 0], self.testdata[0, 0])
+        self.assertEqual(rv[0][0, 0], self.testdata[0, 0])
 
     def test_snap_times_increment(self):
         now = dtutil.strptime_tz("1 1 2000 0", "%m %d %Y %H", tzstr="America/Los_Angeles")
@@ -205,9 +205,9 @@ class TestGroupByDatetime(unittest.TestCase):
                                            width=12,
                                            snap_times=True)
         rv = op([self.testdata[10:30, :]])
-        self.assertEquals(len(rv[0]), 2)
-        self.assertEquals(rv[0][0, 0], self.testdata[0, 0])
-        self.assertEquals(rv[0][1, 0], self.testdata[12, 0])
+        self.assertEqual(len(rv[0]), 2)
+        self.assertEqual(rv[0][0, 0], self.testdata[0, 0])
+        self.assertEqual(rv[0][1, 0], self.testdata[12, 0])
 
     def test_slide(self):
         now = dtutil.strptime_tz("1 1 2000 0", "%m %d %Y %H", tzstr="America/Los_Angeles")
@@ -219,8 +219,8 @@ class TestGroupByDatetime(unittest.TestCase):
                                            width=4,
                                            slide=2)
         rv = op([self.testdata])
-        self.assertEquals(np.sum(rv[0][:, 0] - self.testdata[:-2:2, 0]), 0)
-        self.assertEquals(np.sum(rv[0][:, 1] - self.testdata[:-2:2, 1]), 0)
+        self.assertEqual(np.sum(rv[0][:, 0] - self.testdata[:-2:2, 0]), 0)
+        self.assertEqual(np.sum(rv[0][:, 1] - self.testdata[:-2:2, 1]), 0)
 
     def test_flush(self):
         now = dtutil.strptime_tz("1 1 2000 0", "%m %d %Y %H", tzstr="America/Los_Angeles")
@@ -236,7 +236,7 @@ class TestGroupByDatetime(unittest.TestCase):
                                     [self.testdata]))
 
         # if we don't properly flush the last hour, we should only get hours - 1 results
-        self.assertEquals((rv[0][-1, 0] - (now *  1000)) / (3600 * 1000), self.hours - 1)
+        self.assertEqual((rv[0][-1, 0] - (now *  1000)) / (3600 * 1000), self.hours - 1)
 
     def test_fill_missing(self):
 
@@ -282,7 +282,7 @@ class TestMaskedDTList(unittest.TestCase):
         now = dtutil.dt2ts(now)
 
         self.testdata = np.ones((self.hours, 2))
-        for i in xrange(0, self.hours):
+        for i in range(0, self.hours):
             self.testdata[i, :] = i
             
         self.testdata[:, 0] *= 3600 
@@ -294,7 +294,7 @@ class TestMaskedDTList(unittest.TestCase):
         i = 0
         while i < len(self.ma):
             i = bisect.bisect_left(self.ma, self.ma[0] + self.width)
-            self.assertEquals(self.ma[i], self.ma[0] + self.width)
+            self.assertEqual(self.ma[i], self.ma[0] + self.width)
             self.ma.truncate(i)
 
     def test_realpattern(self):
@@ -302,7 +302,7 @@ class TestMaskedDTList(unittest.TestCase):
         while True:
             i = bisect.bisect_left(self.ma, start + self.width)
             if i >= len(self.ma): break
-            self.assertEquals(self.ma[i], start + self.width)
+            self.assertEqual(self.ma[i], start + self.width)
             start += self.width
 
 class TestJoins(unittest.TestCase):
@@ -310,20 +310,20 @@ class TestJoins(unittest.TestCase):
         self.data = [operators.null] * 2
         self.data[0] = np.ones((20, 2))
         self.data[1] = np.ones((20, 2))
-        for i in xrange(0, 20):
+        for i in range(0, 20):
             self.data[0][i, 0] = i
             self.data[1][i, 0] = i * 2
 
     def test_join_union(self):
         data = operators.join_union(self.data)
         for x in data:
-            self.assertEquals(len(x), 30)
-            for i in xrange(0, len(x)):
+            self.assertEqual(len(x), 30)
+            for i in range(0, len(x)):
                 # make sure the timestamps came out right
                 if i < 20:
-                    self.assertEquals(x[i, 0], i)
+                    self.assertEqual(x[i, 0], i)
                 else:
-                    self.assertEquals(x[i, 0], (i - 10) * 2)
+                    self.assertEqual(x[i, 0], (i - 10) * 2)
             # should check the outputs too... 
 
     def test_join_union_empty(self):
@@ -331,17 +331,17 @@ class TestJoins(unittest.TestCase):
         data = operators.join_union([operators.null, operators.null])
         for x in data:
             # they should have the same size as null, which is empty
-            self.assertEquals(x.size, operators.null.size)
+            self.assertEqual(x.size, operators.null.size)
         
         # test if one of the inputs is null
         self.data[1] = operators.null
         data = operators.join_union(self.data)
-        self.assertEquals(np.sum(data[0] - self.data[0]), 0)
+        self.assertEqual(np.sum(data[0] - self.data[0]), 0)
 
         # the other stream should have copied timestamps from array 1
-        self.assertEquals(np.sum(data[1][:, 0] - self.data[0][:, 0]), 0)
+        self.assertEqual(np.sum(data[1][:, 0] - self.data[0][:, 0]), 0)
         # but only NaN's
-        self.assertEquals(np.sum(np.isnan(data[1][:, 1])), len(data[1][:, 1]))
+        self.assertEqual(np.sum(np.isnan(data[1][:, 1])), len(data[1][:, 1]))
 
 
 class TestTranspose(unittest.TestCase):
@@ -351,9 +351,9 @@ class TestTranspose(unittest.TestCase):
 
     def test_simple(self):
         datas = operators.transpose_streams(self.data)
-        self.assertEquals(np.sum(datas[:, 0] - self.data[0][:, 0]), 0)
-        self.assertEquals(np.sum(datas[:, 1] - self.data[0][:, 1]), 0)
-        self.assertEquals(np.sum(datas[:, 2] - self.data[1][:, 1]), 0)
+        self.assertEqual(np.sum(datas[:, 0] - self.data[0][:, 0]), 0)
+        self.assertEqual(np.sum(datas[:, 1] - self.data[0][:, 1]), 0)
+        self.assertEqual(np.sum(datas[:, 2] - self.data[1][:, 1]), 0)
 
 class TestVectorOperator(unittest.TestCase):
     def setUp(self):
@@ -363,21 +363,21 @@ class TestVectorOperator(unittest.TestCase):
     def test_stream_axis(self):
         """This is the default operator the vector operator uses"""
         op = self.TestClass(self.inputs, axis=1)
-        self.assertEquals(op.block_streaming, False)
+        self.assertEqual(op.block_streaming, False)
         data = make_test_data(5)
         rv = op(data)
-        self.assertEquals(np.sum(rv[-1] - data[-1]), 0)
+        self.assertEqual(np.sum(rv[-1] - data[-1]), 0)
 
     def test_time_axis(self):
         op = self.TestClass(self.inputs, axis=1)
-        self.assertEquals(op.block_streaming, False)
+        self.assertEqual(op.block_streaming, False)
         data = make_test_data(5)
         rv = op(data)
 
     def test_streaming(self):
         """Check that block_streaming is twiddled appropriately"""
-        self.assertEquals(self.TestClass(self.inputs, axis=0).block_streaming, True)
-        self.assertEquals(self.TestClass(self.inputs, axis=1).block_streaming, False)
+        self.assertEqual(self.TestClass(self.inputs, axis=0).block_streaming, True)
+        self.assertEqual(self.TestClass(self.inputs, axis=1).block_streaming, False)
 
-        self.assertEquals(arithmetic.count(self.inputs, axis=0).block_streaming, True)
-        self.assertEquals(arithmetic.count(self.inputs, axis=1).block_streaming, False)
+        self.assertEqual(arithmetic.count(self.inputs, axis=0).block_streaming, True)
+        self.assertEqual(arithmetic.count(self.inputs, axis=1).block_streaming, False)

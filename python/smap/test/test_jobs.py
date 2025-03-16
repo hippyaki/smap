@@ -1,4 +1,4 @@
-from zope.interface import implements
+from zope.interface import implementer
 from twisted.internet.defer import Deferred
 from twisted.internet.defer import succeed
 from twisted.web.iweb import IBodyProducer
@@ -12,8 +12,9 @@ import sys
 import smap.util
 import time
 
+@implementer(IBodyProducer)
 class StringProducer(object):
-    implements(IBodyProducer)
+    # implements(IBodyProducer)
 
     def __init__(self, body):
         self.body = body
@@ -37,12 +38,12 @@ class BeginningPrinter(Protocol):
     def dataReceived(self, bytes):
         if self.remaining:
             display = bytes[:self.remaining]
-            print 'Some data received:'
-            print display
+            print('Some data received:')
+            print(display)
             self.remaining -= len(display)
 
     def connectionLost(self, reason):
-        print 'Finished receiving body:', reason.getErrorMessage()
+        print('Finished receiving body:', reason.getErrorMessage())
         self.finished.callback(None)
 
 def put_json_actuate(url, verb, body_str):
@@ -56,7 +57,7 @@ def validate1(response):
     finished = Deferred()
     response.deliverBody(BeginningPrinter(finished))
     assert response.code == 200
-    print 'validate1 okay'
+    print('validate1 okay')
     return finished
 
 def shutdown(response):

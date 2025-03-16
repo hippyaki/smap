@@ -48,7 +48,7 @@ class TestParser(unittest.TestCase):
                    {'uuid' : str(uuid.uuid1()), 'Properties/Timezone': 'America/Los_Angeles'},
                    {'uuid' : str(uuid.uuid1()), 'Properties/Timezone': 'America/Los_Angeles'}])
         self.assertFalse(inst.block_streaming)
-        self.assertEquals(len(inst.outputs), 1)
+        self.assertEqual(len(inst.outputs), 1)
 
         for i in [0, 1, 20, 21, 40, 41, 60, 61, 100, 101, 200, 300]:
             d = [operators.null] * 4
@@ -56,8 +56,8 @@ class TestParser(unittest.TestCase):
 
             out = inst(d)
             if i == 40:
-                self.assertEquals(np.sum(out[0] - np.array([[0, 2]])), 0)
+                self.assertEqual(np.sum(out[0] - np.array([[0, 2]])), 0)
             elif i == 60:
-                self.assertEquals(np.sum(out[0] - np.array([[20 * 1000, 2]])), 0)
+                self.assertEqual(np.sum(out[0] - np.array([[20 * 1000, 2]])), 0)
             elif i == 100:
-                self.assertEquals(np.sum(out[0] - np.array([[40 * 1000, 2], [60 * 1000, 2]])), 0)
+                self.assertEqual(np.sum(out[0] - np.array([[40 * 1000, 2], [60 * 1000, 2]])), 0)
